@@ -1,5 +1,6 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -83,7 +84,7 @@ subprojects {
         }
 
         configure<MavenPublishBaseExtension> {
-            publishToMavenCentral(automaticRelease = true)
+            publishToMavenCentral(host = SonatypeHost.S01)
             signAllPublications()
         }
 
