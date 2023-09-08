@@ -175,9 +175,9 @@ dependencies {
 
 #### Compatibility
 
-| Abecedary version | Lint version  | AGP version (lint version + 23) |
+| Abecedary version | Lint version  | AGP version (Lint version - 23) |
 |-------------------|---------------|---------------------------------|
-| 0.2.0             | 31.2.0-beta01 | 8.2.0                           |
+| 0.2.0             | 31.2.0-beta01 | 8.2.0-alpha10                   |
 
 #### Troubleshooting
 
