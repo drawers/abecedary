@@ -1,0 +1,26 @@
+[versions]
+jdk = "19"
+junit4 = "4.13.2"
+ktlint = "0.50.0"
+lint = "31.2.0-beta01"
+# lint checks must target JDK 17, but the runtime should remain 11
+lintJvmTarget = "17"
+runtimeJvmTarget = "11"
+agp = "8.2.0-alpha10"
+kotlin1820 = "1.8.20"
+
+[plugins]
+lint = { id = "com.android.lint", version = "8.0.2" }
+dokka = { id = "org.jetbrains.dokka", version = "1.9.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.25.3" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+spotless = { id = "com.diffplug.spotless", version = "6.19.0" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin1820" }
+
+[libraries]
+junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
+lint-api = { module = "com.android.tools.lint:lint-api", version.ref = "lint" }
+lint-checks = { module = "com.android.tools.lint:lint-checks", version.ref = "lint" } # do i need this?
+lint = { module = "com.android.tools.lint:lint", version.ref = "lint" }
+lint-tests = { module = "com.android.tools.lint:lint-tests", version.ref = "lint" }

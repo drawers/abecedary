@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="17">
+      <module name="abecedary.abecedary-detekt.main" target="11" />
+      <module name="abecedary.abecedary-detekt.test" target="11" />
+      <module name="abecedary.abecedary-sample-dependency.main" target="11" />
+      <module name="abecedary.abecedary-sample-dependency.test" target="11" />
+      <module name="abecedary.abecedary-sample.test" target="11" />
+      <module name="abedecary.abecedary-annotation" target="17" />
+      <module name="abedecary.abecedary-annotation.main" target="17" />
+      <module name="abedecary.abecedary-annotation.test" target="17" />
+      <module name="abedecary.abecedary-lint" target="17" />
+      <module name="abedecary.abecedary-lint.main" target="17" />
+      <module name="abedecary.abecedary-lint.test" target="17" />
+      <module name="Abedecary.app" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

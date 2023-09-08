@@ -1,0 +1,154 @@
+// Copyright (C) 2023 David Rawson
+// SPDX-License-Identifier: Apache-2.0
+package io.github.drawers.abecedary.lint
+
+import com.android.tools.lint.checks.infrastructure.LintDetectorTest.kotlin
+import com.android.tools.lint.checks.infrastructure.TestLintTask.lint
+import io.github.drawers.abecedary.lint.Stubs.ALPHABETICAL
+import org.junit.Test
+
+class SealedSubtypeOrderDetectorTest {
+
+    @Test
+    fun subclassOutOfOrder() {
+        lint()
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        sealed class Fruit {
+                            object Banana : Fruit()
+                            object Apple : Fruit()
+                        }
+                    """,
+                ),
+            )
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectContains("Rearrange so that Apple is before Banana")
+    }
+
+    @Test
+    fun interfaceOutOfOrder() {
+        lint()
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        sealed interface Fruit {
+                            object Banana : Fruit
+                            interface Apple : Fruit
+                        }
+                    """,
+                ),
+            )
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectContains("Rearrange so that Apple is before Banana")
+    }
+
+    @Test
+    fun otherDeclarations() {
+        lint()
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        sealed class Fruit {
+                            object Apple : Fruit()
+                            val cherry = "Cherry"
+                            object Banana : Fruit()
+                        }
+                    """,
+                ),
+            )
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun nested() {
+        lint()
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        sealed class Fruit {
+                            sealed class Apple: Fruit()  {
+                                object RedDelicious: Apple()
+                                object GrannySmith: Apple()
+                            }
+                            object Banana : Fruit()
+                        }
+                    """,
+                ),
+            )
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectContains("Rearrange so that GrannySmith is before RedDelicious")
+    }
+
+    @Test
+    fun declaredOutside() {
+        lint()
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        sealed class Fruit
+
+                        object Banana: Fruit()
+                        object Apple: Fruit()
+                    """,
+                ),
+            )
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun noAnnotation() {
+        lint()
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        sealed class Fruit {
+
+                            object Banana: Fruit()
+                            object Apple: Fruit()
+                        }
+                    """,
+                ),
+            )
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+}
