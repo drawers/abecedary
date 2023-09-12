@@ -35,11 +35,11 @@ as they arrive (chronological order). This can work in small codebases, but in
 larger codebases it can cause problems: 
 
 * Appending to the end of the file can generate merge conflicts when two developers
-attempt to land their new entry at the end of the file at a similar time
+attempt to land their new entry at the end of the file at a similar time.
 * There might be a team who has more of a vested interest in the enum through using it more
 frequently. In this case, it's much easier for them to read the file if it maintains
 some other kind of order.
-* Post-hoc re-orderings after the file has reached some tipping point can generate a noisy diff
+* Post-hoc re-orderings after the file has reached some tipping point can generate a noisy diff.
 
 Lexicographic order (alphabetical order) is the most natural choice where we want to locate
 an entry within a long list. But we can't insist on it everywhere because of cases
@@ -184,6 +184,7 @@ dependencies {
 ```
 
 Latest versions:
+
 https://mvnrepository.com/artifact/io.github.drawers/abecedary-annotation
 https://mvnrepository.com/artifact/io.github.drawers/abecedary-lint
 
@@ -193,8 +194,7 @@ https://mvnrepository.com/artifact/io.github.drawers/abecedary-lint
 |-------------------|---------------|
 | 0.2.0             | 31.2.0-beta01 |
 
-Remember: 
-Lint versions are tied to Android Gradle Plugin (AGP) versions:
+Remember that lint versions are tied to Android Gradle Plugin (AGP) versions:
 
 ```kotlin
 lintVersion = androidGradlePluginVersion + 23.0.0
@@ -221,9 +221,6 @@ to avoid an extra dependency on a 3rd party library.
 This means that a design where Abecedary abstracts over lint was considered and discarded.
 
 ### Severity
-
-Android Lint lets you define different severities for violations of rules. Why did default to
-`Severity.ERROR`?
 
 The `@Alphabetical` annotation is for cases where it _really_ is important to keep
 dictionary order. Serious enough that you'd expect a PR to address a comment about ordering before
