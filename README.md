@@ -2,14 +2,13 @@
 
 ![An abecedarian form from a Tibetan ritual text](/images/abecedary.png)
 
-An abecedarian form (ka rtsom) from a Tibetan ritual text.
+_An abecedarian form (ka rtsom) from a Tibetan ritual text._
 
 _Image from [BDRC](http://purl.bdrc.io/resource/MW1NLM718_O1NLM718_011)_
 
 ## Introduction
 
-In large codebases, files containing enums can become messy. Some enums have a clear
-order that requires no explanation:
+For some enums, order is meaningful:
 
 ```kotlin
 enum class Planet {
@@ -17,9 +16,13 @@ enum class Planet {
     VENUS,
     EARTH, // etc.
 }
+
+println("rock ${Planet.EARTH.ordinal + 1} from the sun") // rock 3 from the sun
+println("${Planet.MERCURY < Planet.VENUS}") // true
 ```
 
-But others don't:
+In others, order is arbitrary and we just want a set of constants
+with exhaustiveness:
 
 ```kotlin
 enum class CatalogFeature(override val id: String) : Feature {
@@ -29,14 +32,21 @@ enum class CatalogFeature(override val id: String) : Feature {
 }
 ```
 
-It's often not clear for new devs where to put their new entry:
+In the case where order is meaningless, it's tempting just to add new entries
+as they arrive (chronological order). This can work in small codebases, but in 
+larger codebases it can cause problems: 
 
-* Chronological can lead to more merge conflicts where two devs want to land their new entry
-  at the end of the file at the same time.
-* Re-orderings often make for a noisy diff and can create
-  a burden for teams who have more stake in the code quality of the enum file.
-* Insisting on alphabetical order everywhere can be dangerous when there are enums parsed
-  from ordinals sent over the wire.
+* Appending to the end of the file can generate merge conflicts when two developers
+attempt to land their new entry at the end of the file at a similar time
+* There might be a team who has more of a vested interest in the enum through using it more
+frequently. In this case, it's much easier for them to read the file if it maintains
+some other kind of order.
+* Post-hoc re-orderings after the file has reached some tipping point can generate a noisy diff
+
+Lexicographic order (alphabetical order) is the most natural choice where we want to locate
+an entry within a long list. But we can't insist on it everywhere because of cases
+like `enum class Planet` where the entry order is meaningful. It's especially dangerous
+to reorder when enums are parsed from an ordinal sent over the wire.
 
 Abecedary is a static analysis tool that lets you choose which enums you want to maintain
 alphabetical
@@ -105,6 +115,11 @@ sealed class Fruit {
     object Cherry : Fruit()
 }
 
+@Alphabetical
+interface Edible {
+  val calories: Int
+}
+
 sealed interface Vegetable : Edible {
     object Asparagus : Vegetable {
         override val calories = 20
@@ -120,7 +135,7 @@ we want to keep things simple and don't want to enter into more general disputes
 order of members
 within a Kotlin file.
 
-### EXPERIMENTAL - Calls to functions with vararg parameters
+### Calls to functions with vararg parameters
 
 Thanks to a suggestion from [Nicola Corti](https://github.com/cortinico), it's possible to target a
 call expression:
@@ -163,9 +178,6 @@ val specialList = SpecialList("a", "b", "c")
 Just add the dependency to the `lintChecks` configuration. Note for non-android projects, you must
 apply the `com.android.lint` Gradle plugin to use this:
 
-Latest version:
-https://mvnrepository.com/artifact/io.github.drawers/abecedary-lint
-
 ```kotlin
 dependencies {
     compileOnly("io.github.drawers.abecedary.abecedary-annotation:<VERSION>")
@@ -173,33 +185,28 @@ dependencies {
 }
 ```
 
+Latest versions:
+https://mvnrepository.com/artifact/io.github.drawers/abecedary-annotation
+https://mvnrepository.com/artifact/io.github.drawers/abecedary-lint
+
 #### Compatibility
 
-| Abecedary version | Lint version  | AGP version (Lint version - 23) |
-|-------------------|---------------|---------------------------------|
-| 0.2.0             | 31.2.0-beta01 | 8.2.0-alpha10                   |
+| Abecedary version | Lint version  |
+|-------------------|---------------|
+| 0.2.0             | 31.2.0-beta01 |
 
-#### Troubleshooting
-
-Problems with the Abecedary checks not showing in the IDE can sometimes be solved by using a newer
-version of lint:
-
-https://googlesamples.github.io/android-custom-lint-rules/usage/newer-lint.md.html
-
-Or a newer version of Android Studio.
-
-This is because lint is integrated with the Android Gradle Plugin:
+Remember: 
+Lint versions are tied to Android Gradle Plugin (AGP) versions:
 
 ```kotlin
-lintVersion = gradlePluginVersion + 23.0.0
+lintVersion = androidGradlePluginVersion + 23.0.0
 ```
 
-See [the lint API guide](https://googlesamples.github.io/android-custom-lint-rules/api-guide.html#example:samplelintcheckgithubproject/lintversion?)
-for more information.
+But if you're on a lower version of AGP, you can still use a higher version of lint
+by following the instructions [here](https://googlesamples.github.io/android-custom-lint-rules/usage/newer-lint.md.html)
 
-Problems with Android projects that include a module for custom lint checks can often be solved by
-running the `clean` and `assemble` tasks
-for that module and then going to `File / Reload All from Disk`
+Problems with the Abecedary checks not showing in the IDE can sometimes be solved by using a newer
+version of lint or by upgrading to a more recent version of Android Studio.
 
 ## Philosophy
 
@@ -215,7 +222,7 @@ to avoid an extra dependency on a 3rd party library.
 
 This means that a design where Abecedary abstracts over lint was considered and discarded.
 
-### Why Severity.ERROR ?
+### Severity
 
 Android Lint lets you define different severities for violations of rules. Why did default to
 `Severity.ERROR`?
@@ -229,8 +236,7 @@ See
 the [Configuring Issues and Severity](http://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#lintgradleplugindsl/configuringissuesandseverity)
 section of the lint user guide.
 
-### Detekt?
+### Inspiration
 
-I have Detekt versions of these checks to share, but I don't have time to maintain a Detekt
-extension.
-If you are interested in maintaining a Detekt version of Abecedary, let me know!
+Much of the infrastructure and approach in this project is informed by the amazing 
+https://github.com/slackhq/slack-lints project.
