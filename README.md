@@ -2,9 +2,7 @@
 
 ![An abecedarian form from a Tibetan ritual text](/images/abecedary.png)
 
-_An abecedarian form (ka rtsom) from a Tibetan ritual text._
-
-_Image from [BDRC](http://purl.bdrc.io/resource/MW1NLM718_O1NLM718_011)_
+_An abecedarian form (ka rtsom) from a Tibetan ritual text. (Image from [BDRC](http://purl.bdrc.io/resource/MW1NLM718_O1NLM718_011))_
 
 ## Introduction
 
