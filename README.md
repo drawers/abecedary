@@ -231,7 +231,7 @@ See
 the [Configuring Issues and Severity](http://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#lintgradleplugindsl/configuringissuesandseverity)
 section of the lint user guide.
 
-### Inspiration
+## Inspiration
 
 Much of the infrastructure and approach in this project is informed by the amazing 
 https://github.com/slackhq/slack-lints project.
