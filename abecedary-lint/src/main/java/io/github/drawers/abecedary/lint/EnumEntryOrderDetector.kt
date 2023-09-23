@@ -3,6 +3,7 @@
 package io.github.drawers.abecedary.lint
 
 import com.android.tools.lint.client.api.UElementHandler
+import com.android.tools.lint.detector.api.BooleanOption
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
@@ -33,7 +34,9 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
                     return
                 }
 
-                if (!node.hasAlphabeticalAnnotation()) return
+                if (!node.hasAlphabeticalAnnotation(searchSuperTypes = SEARCH_SUPER_INTERFACES.getValue(context))) {
+                    return
+                }
 
                 val entries = node.kotlinEnumEntries() ?: node.javaEnumEntries()
                 if (entries.isEmpty()) return
@@ -104,6 +107,17 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
     )
 
     companion object {
+
+        val SEARCH_SUPER_INTERFACES = BooleanOption(
+            name = "searchSuperInterfaces",
+            description = "Whether to search through super interfaces for the @Alphabetical annotation",
+            defaultValue = true,
+            explanation = "Settings this to `false` means your enums **must** have the annotation " +
+                "explicitly on their declaration. In other words, it disables the behavior where extending an " +
+                "interface decorated with annotation will check the current enum for alphabetical order. " +
+                "This *may* be more performant depending on your project.",
+        )
+
         @JvmField
         val ISSUE = Issue.create(
             id = "EnumEntryOrder",
@@ -123,6 +137,6 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
             category = Category.PRODUCTIVITY,
             priority = 5,
             severity = Severity.ERROR,
-        )
+        ).setOptions(listOf(SEARCH_SUPER_INTERFACES))
     }
 }

@@ -58,7 +58,7 @@ class EnumEntryOrderDetectorTest {
     }
 
     @Test
-    fun annotationOnInterface() {
+    fun annotationOnSuperInterface() {
         lint()
             .files(
                 ALPHABETICAL,
@@ -83,6 +83,34 @@ class EnumEntryOrderDetectorTest {
             .run()
             .expectErrorCount(1)
             .expectContains("Rearrange so that APPLE is before BANANA")
+    }
+
+    @Test
+    fun annotationOnSuperInterfaceNoSearchSuperInterfaces() {
+        lint()
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        interface Edible
+
+                        interface Delicious: Edible
+
+                        enum class Fruit: Delicious {
+                            BANANA,
+                            APPLE,
+                        }
+                    """,
+                ),
+            )
+            .issues(EnumEntryOrderDetector.ISSUE)
+            .configureOption(EnumEntryOrderDetector.SEARCH_SUPER_INTERFACES, false)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
     }
 
     @Test

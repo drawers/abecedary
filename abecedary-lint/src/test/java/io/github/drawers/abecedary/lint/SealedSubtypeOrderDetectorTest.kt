@@ -151,4 +151,60 @@ class SealedSubtypeOrderDetectorTest {
             .run()
             .expectClean()
     }
+
+    @Test
+    fun annotationOnSuperType() {
+        lint()
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        interface Edible
+
+                        interface Delicious: Edible
+
+                        sealed class Fruit: Delicious {
+                            object Banana: Fruit()
+                            object Apple: Fruit()
+                        }
+                    """,
+                ),
+            )
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .allowMissingSdk()
+            .run()
+            .expectErrorCount(1)
+            .expectContains("Rearrange so that Apple is before Banana")
+    }
+
+    @Test
+    fun annotationOnSuperTypeNoSearchSuperTypes() {
+        lint()
+            .files(
+                ALPHABETICAL,
+                kotlin(
+                    """
+                        import io.github.drawers.abecedary.Alphabetical
+
+                        @Alphabetical
+                        interface Edible
+
+                        interface Delicious: Edible
+
+                        sealed class Fruit: Delicious {
+                            object Banana: Fruit()
+                            object Apple: Fruit()
+                        }
+                    """,
+                ),
+            )
+            .issues(SealedSubtypeOrderDetector.ISSUE)
+            .configureOption(SealedSubtypeOrderDetector.SEARCH_SUPER_TYPES, false)
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
 }

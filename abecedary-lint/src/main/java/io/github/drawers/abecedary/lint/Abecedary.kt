@@ -9,10 +9,16 @@ object Annotation {
     const val FULLY_QUALIFIED_NAME = "io.github.drawers.abecedary.Alphabetical"
 }
 
-fun UClass.hasAlphabeticalAnnotation(): Boolean {
+fun UClass.hasAlphabeticalAnnotation(searchSuperTypes: Boolean): Boolean {
     // annotation explicit on class
     if (hasAnnotation(Annotation.FULLY_QUALIFIED_NAME)) {
         return true
+    }
+
+    if (!searchSuperTypes) {
+        // we're only interested in types
+        // explicitly annotated with @Alphabetical
+        return false
     }
 
     // check for implicit annotation through supertypes
