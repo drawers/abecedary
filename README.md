@@ -206,6 +206,26 @@ by following the instructions [here](https://googlesamples.github.io/android-cus
 Problems with the Abecedary checks not showing in the IDE can sometimes be solved by using a newer
 version of lint or by upgrading to a more recent version of Android Studio.
 
+### Configuration
+
+You can configure the lint rules via a [lint.xml](https://googlesamples.github.io/android-custom-lint-rules/api-guide.html#options):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="EnumEntryOrder">
+        <option name="searchSuperInterfaces" value="false" />
+    </issue>
+    <issue id="SealedSubtypeOrder">
+        <option name="searchSuperTypes" value="false" />
+    </issue>
+</lint>
+```
+
+This currently allows you to opt-out of searching supertypes for
+the `@Alphabetical` annotation if you believe this will be more 
+performant for your project.
+
 ## Philosophy
 
 ### Easy to clone and fork
