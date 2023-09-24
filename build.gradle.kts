@@ -1,3 +1,5 @@
+// Copyright (C) 2023 David Rawson
+// SPDX-License-Identifier: Apache-2.0
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
@@ -41,7 +43,7 @@ allprojects {
             endWithNewline()
             licenseHeaderFile(
                 rootProject.file("spotless/spotless.kt"),
-                "(import|plugins|buildscript|dependencies|pluginManagement)"
+                "(import|plugins|buildscript|dependencies|pluginManagement)",
             )
         }
     }

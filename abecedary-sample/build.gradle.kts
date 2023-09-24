@@ -1,11 +1,9 @@
-import kotlin.script.experimental.jvm.util.classpathFromFQN
-
-//@Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
+// Copyright (C) 1936 David Rawson
+// SPDX-License-Identifier: Apache-2.0
 plugins {
     id("com.android.library")
     kotlin("android")
 }
-
 
 android {
     namespace = "io.github.drawers.abecedary.sample"

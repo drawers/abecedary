@@ -1,3 +1,5 @@
+// Copyright (C) 2023 David Rawson
+// SPDX-License-Identifier: Apache-2.0
 package io.github.drawers.abecedary
 
 /**

@@ -1,5 +1,6 @@
+// Copyright (C) 2023 David Rawson
+// SPDX-License-Identifier: Apache-2.0
 @file:Suppress("InvalidPackageDeclaration", "MagicNumber", "MatchingDeclarationName")
-
 
 package io.github.drawers.abecedary.sample
 
@@ -26,7 +27,6 @@ sealed class Vegetable : Edible {
 
 val letters = @Alphabetical listOf("b", "c", "a")
 val myMeal = @Alphabetical Meal.tastyListOf("carrot", "beetroot")
-
 
 val portion = @Alphabetical Portion().tastyListOf("a", "b", "c")
 
