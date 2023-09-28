@@ -2,7 +2,8 @@
 
 ![An abecedarian form from a Tibetan ritual text](/images/abecedary.png)
 
-_An abecedarian form (ka rtsom) from a Tibetan ritual text. (Image from [BDRC](http://purl.bdrc.io/resource/MW1NLM718_O1NLM718_011))_
+_An abecedarian form (ka rtsom) from a Tibetan ritual text. (Image
+from [BDRC](http://purl.bdrc.io/resource/MW1NLM718_O1NLM718_011))_
 
 ## Introduction
 
@@ -35,10 +36,10 @@ as they arrive (chronological order). This can work in small codebases, but in
 larger codebases it can cause problems:
 
 * Appending to the end of the file can generate merge conflicts when two developers
-attempt to land their new entry at the end of the file at a similar time.
+  attempt to land their new entry at the end of the file at a similar time.
 * There might be a team who has more of a vested interest in the enum through using it more
-frequently. In this case, it's much easier for them to read the file if it maintains
-some other kind of order.
+  frequently. In this case, it's much easier for them to read the file if it maintains
+  some other kind of order.
 * Post-hoc re-orderings after the file has reached some tipping point can generate a noisy diff.
 
 Lexicographic order (alphabetical order) is the most natural choice where we want to locate
@@ -115,7 +116,7 @@ sealed class Fruit {
 
 @Alphabetical
 interface Edible {
-  val calories: Int
+    val calories: Int
 }
 
 sealed interface Vegetable : Edible {
@@ -173,8 +174,8 @@ val specialList = SpecialList("a", "b", "c")
 
 ### Installation
 
-Just add the dependency to the `lintChecks` configuration. Note for non-android projects, you must
-apply the `com.android.lint` Gradle plugin to use this:
+Just add the annotation artifact as `compileOnly` and the lint artifact to the `lintChecks`
+configuration.
 
 ```kotlin
 dependencies {
@@ -183,10 +184,14 @@ dependencies {
 }
 ```
 
-Latest versions:
+| Artifact             | Version                                                                                                                                                                          |
+|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| abecedary-annotation | [![Maven Central](https://img.shields.io/maven-central/v/io.github.drawers/abecedary-annotation.svg)](https://mvnrepository.com/artifact/io.github.drawers/abecedary-annotation) |
+| abecedary-lint       | [![Maven Central](https://img.shields.io/maven-central/v/io.github.drawers/abecedary-lint.svg)](https://mvnrepository.com/artifact/io.github.drawers/abecedary-lint)             |
 
-https://mvnrepository.com/artifact/io.github.drawers/abecedary-annotation
-https://mvnrepository.com/artifact/io.github.drawers/abecedary-lint
+
+Note for non-android projects, you must apply the `com.android.lint` Gradle plugin to
+use `lintChecks`.
 
 #### Compatibility
 
@@ -201,14 +206,16 @@ lintVersion = androidGradlePluginVersion + 23.0.0
 ```
 
 But if you're on a lower version of AGP, you can still use a higher version of lint
-by following the instructions [here](https://googlesamples.github.io/android-custom-lint-rules/usage/newer-lint.md.html)
+by following the
+instructions [here](https://googlesamples.github.io/android-custom-lint-rules/usage/newer-lint.md.html)
 
 Problems with the Abecedary checks not showing in the IDE can sometimes be solved by using a newer
 version of lint or by upgrading to a more recent version of Android Studio.
 
 ### Configuration
 
-You can configure the lint rules via a [lint.xml](https://googlesamples.github.io/android-custom-lint-rules/api-guide.html#options):
+You can configure the lint rules via
+a [lint.xml](https://googlesamples.github.io/android-custom-lint-rules/api-guide.html#options):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
