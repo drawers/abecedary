@@ -54,6 +54,7 @@ class EnumEntryOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
+            .expectContains("it is annotated with @Alphabetical")
             .expectContains("Rearrange so that APPLE is before BANANA")
     }
 
@@ -82,6 +83,7 @@ class EnumEntryOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
+            .expectContains("its super interface Edible is annotated with @Alphabetical")
             .expectContains("Rearrange so that APPLE is before BANANA")
     }
 

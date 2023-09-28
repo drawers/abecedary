@@ -12,6 +12,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiEnumConstant
 import com.intellij.psi.util.childrenOfType
@@ -34,9 +35,7 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
                     return
                 }
 
-                if (!node.hasAlphabeticalAnnotation(searchSuperTypes = SEARCH_SUPER_INTERFACES.getValue(context))) {
-                    return
-                }
+                val annotationTarget = node.findAlphabeticalAnnotation(searchSuperTypes = SEARCH_SUPER_INTERFACES.getValue(context)) ?: return
 
                 val entries = node.kotlinEnumEntries() ?: node.javaEnumEntries()
                 if (entries.isEmpty()) return
@@ -56,10 +55,24 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
                 context.report(
                     issue = ISSUE,
                     location = context.getLocation(node as UElement),
-                    message = "`${node.name}` should declare its entries in alphabetical order. " +
-                        "Rearrange so that ${outOfOrder.expected.name} is before ${outOfOrder.actual.name}.",
+                    message = buildMessage(node, annotationTarget, outOfOrder),
                     quickfixData = null,
                 )
+            }
+
+            private fun buildMessage(
+                enum: PsiClass,
+                annotationTarget: PsiClass,
+                outOfOrder: Order,
+            ) = buildString {
+                append("`${enum.name}` should declare its entries in alphabetical order ")
+                if (enum == annotationTarget) {
+                    append("since it ")
+                } else {
+                    append("since its super interface `${annotationTarget.name}` ")
+                }
+                append("is annotated with `@Alphabetical`. ")
+                append("Rearrange so that ${outOfOrder.expected.name} is before ${outOfOrder.actual.name}.")
             }
 
             /**

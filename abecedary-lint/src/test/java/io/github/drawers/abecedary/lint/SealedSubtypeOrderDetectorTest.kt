@@ -30,6 +30,7 @@ class SealedSubtypeOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
+            .expectContains("it is annotated with @Alphabetical")
             .expectContains("Rearrange so that Apple is before Banana")
     }
 
@@ -177,6 +178,7 @@ class SealedSubtypeOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
+            .expectContains("its super type Edible is annotated with @Alphabetical")
             .expectContains("Rearrange so that Apple is before Banana")
     }
 

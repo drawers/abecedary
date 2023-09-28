@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.github.drawers.abecedary.lint
 
+import com.intellij.psi.PsiClass
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import org.jetbrains.uast.UClass
 
@@ -9,16 +10,16 @@ object Annotation {
     const val FULLY_QUALIFIED_NAME = "io.github.drawers.abecedary.Alphabetical"
 }
 
-fun UClass.hasAlphabeticalAnnotation(searchSuperTypes: Boolean): Boolean {
+fun UClass.findAlphabeticalAnnotation(searchSuperTypes: Boolean): PsiClass? {
     // annotation explicit on class
     if (hasAnnotation(Annotation.FULLY_QUALIFIED_NAME)) {
-        return true
+        return this
     }
 
     if (!searchSuperTypes) {
         // we're only interested in types
         // explicitly annotated with @Alphabetical
-        return false
+        return null
     }
 
     // check for implicit annotation through supertypes
@@ -34,9 +35,10 @@ fun UClass.hasAlphabeticalAnnotation(searchSuperTypes: Boolean): Boolean {
     while (deque.isNotEmpty()) {
         val head = deque.removeFirst()
         if (head.hasAnnotation(Annotation.FULLY_QUALIFIED_NAME)) {
-            return true
+            return head
         }
         deque.addAll(head.superTypes.mapNotNull { it.resolve() })
     }
-    return false
+
+    return null
 }
