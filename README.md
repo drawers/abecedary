@@ -31,8 +31,8 @@ enum class CatalogFeature(override val id: String) : Feature {
 ```
 
 In the case where order is meaningless, it's tempting just to add new entries
-as they arrive (chronological order). This can work in small codebases, but in 
-larger codebases it can cause problems: 
+as they arrive (chronological order). This can work in small codebases, but in
+larger codebases it can cause problems:
 
 * Appending to the end of the file can generate merge conflicts when two developers
 attempt to land their new entry at the end of the file at a similar time.
@@ -223,7 +223,7 @@ You can configure the lint rules via a [lint.xml](https://googlesamples.github.i
 ```
 
 This currently allows you to opt-out of searching supertypes for
-the `@Alphabetical` annotation if you believe this will be more 
+the `@Alphabetical` annotation if you believe this will be more
 performant for your project.
 
 ## Philosophy
@@ -253,5 +253,5 @@ section of the lint user guide.
 
 ## Inspiration
 
-Much of the infrastructure and approach in this project is informed by the amazing 
+Much of the infrastructure and approach in this project is informed by the amazing
 https://github.com/slackhq/slack-lints project.

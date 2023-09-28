@@ -1,6 +1,5 @@
-@file:Suppress("InvalidPackageDeclaration", "MagicNumber", "MatchingDeclarationName")
-
-
+// Copyright (C) 2023 David Rawson
+// SPDX-License-Identifier: Apache-2.0
 package io.github.drawers.abecedary.sample
 
 import io.github.drawers.abecedary.Alphabetical
@@ -14,24 +13,23 @@ interface Identifiable {
 interface Edible
 
 enum class Fruit(override val id: Int) : Identifiable {
-    CHERRY(1),
     APPLE(2),
     BANANA(3),
+    CHERRY(1),
 }
 
 sealed class Vegetable : Edible {
-    object Daikon : Vegetable()
     object Carrot : Vegetable()
+    object Daikon : Vegetable()
 }
 
-val letters = @Alphabetical listOf("b", "c", "a")
-val myMeal = @Alphabetical Meal.tastyListOf("carrot", "beetroot")
-
+val letters = @Alphabetical listOf("a", "b", "c")
+val myMeal = @Alphabetical Meal.tastyListOf("beetroot", "carrot")
 
 val portion = @Alphabetical Portion().tastyListOf("a", "b", "c")
 
 fun printLetters() {
-    @Alphabetical listOf("a", "c", "b").forEach {
+    @Alphabetical listOf("a", "b", "c").forEach {
         println(it)
     }
 }

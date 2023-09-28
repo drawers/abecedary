@@ -1,0 +1,53 @@
+# file based on https://github.com/slackhq/slack-lints/blob/main/.github/workflows/ci.yml
+
+name: CI
+
+on:
+  # Only run push on main
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+  # Always run on PRs
+  pull_request:
+    branches: [ master ]
+  merge_group:
+
+concurrency:
+  group: 'ci-${{ github.event.merge_group.head_ref || github.head_ref }}-${{ github.workflow }}'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Install JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '19'
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: spotlessCheck compileKotlin
+
+      - name: Check
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: check --stacktrace
+
+      - name: (Fail-only) Upload build reports
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: reports
+          path: |
+            **/build/reports/**
