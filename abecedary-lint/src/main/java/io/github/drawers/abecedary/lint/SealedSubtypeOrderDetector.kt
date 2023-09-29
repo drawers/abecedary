@@ -12,6 +12,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import com.intellij.psi.PsiClass
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UElement
 import java.util.EnumSet
@@ -30,7 +31,7 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
 
                 val qualifiedName = node.qualifiedName ?: return
 
-                if (!node.hasAlphabeticalAnnotation(searchSuperTypes = SEARCH_SUPER_TYPES.getValue(context))) return
+                val annotationTarget = node.findAlphabeticalAnnotation(searchSuperTypes = SEARCH_SUPER_TYPES.getValue(context)) ?: return
 
                 val classDeclarations = node.uastDeclarations
                     .filterIsInstance<UClass>()
@@ -52,9 +53,23 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
                 context.report(
                     issue = ISSUE,
                     location = context.getLocation(node as UElement),
-                    message = "`${node.name}` should declare its sealed subtypes in alphabetical order. " +
-                        "Rearrange so that ${outOfOrder.expected.name} is before ${outOfOrder.actual.name}",
+                    message = buildMessage(node, annotationTarget, outOfOrder),
                 )
+            }
+
+            private fun buildMessage(
+                sealedType: PsiClass,
+                annotationTarget: PsiClass,
+                entry: Entry,
+            ) = buildString {
+                append("`${sealedType.name}` should declare its entries in alphabetical order ")
+                if (sealedType == annotationTarget) {
+                    append("since it ")
+                } else {
+                    append("since its super type `${annotationTarget.name}` ")
+                }
+                append("is annotated with `@Alphabetical`. ")
+                append("Rearrange so that ${entry.expected.name} is before ${entry.actual.name}.")
             }
         }
     }
