@@ -2,7 +2,7 @@
 jdk = "19"
 junit4 = "4.13.2"
 ktlint = "0.50.0"
-lint = "31.2.0-beta01"
+lint = "31.2.0-beta06"
 # lint checks must target JDK 17, but the runtime should remain 11
 lintJvmTarget = "17"
 runtimeJvmTarget = "11"
