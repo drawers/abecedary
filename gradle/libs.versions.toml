@@ -6,7 +6,7 @@ lint = "31.2.0-beta01"
 # lint checks must target JDK 17, but the runtime should remain 11
 lintJvmTarget = "17"
 runtimeJvmTarget = "11"
-agp = "8.2.0-alpha10"
+agp = "8.2.0-beta06"
 kotlin1820 = "1.8.20"
 
 [plugins]
