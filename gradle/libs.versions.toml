@@ -10,7 +10,7 @@ agp = "8.2.0-beta06"
 kotlin1820 = "1.8.20"
 
 [plugins]
-lint = { id = "com.android.lint", version = "8.0.2" }
+lint = { id = "com.android.lint", version = "8.1.2" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.25.3" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
