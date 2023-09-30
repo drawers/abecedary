@@ -7,7 +7,6 @@ import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.Issue
 
 class AbecedaryIssueRegistry : IssueRegistry() {
-
     override val vendor: Vendor =
         Vendor(
             vendorName = "abecedary",
@@ -16,9 +15,10 @@ class AbecedaryIssueRegistry : IssueRegistry() {
             contact = "https://github.com/drawers/abecedary",
         )
 
-    override val issues: List<Issue> = listOf(
-        EnumEntryOrderDetector.ISSUE,
-        SealedSubtypeOrderDetector.ISSUE,
-        VarargOrderDetector.ISSUE,
-    )
+    override val issues: List<Issue> =
+        listOf(
+            EnumEntryOrderDetector.ISSUE,
+            SealedSubtypeOrderDetector.ISSUE,
+            VarargOrderDetector.ISSUE,
+        )
 }

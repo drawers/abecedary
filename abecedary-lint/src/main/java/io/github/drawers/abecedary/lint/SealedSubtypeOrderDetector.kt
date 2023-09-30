@@ -18,12 +18,10 @@ import org.jetbrains.uast.UElement
 import java.util.EnumSet
 
 class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
-
     override fun getApplicableUastTypes(): List<Class<out UElement>> = listOf(UClass::class.java)
 
     override fun createUastHandler(context: JavaContext): UElementHandler {
         return object : UElementHandler() {
-
             override fun visitClass(node: UClass) {
                 if (!context.evaluator.isSealed(node)) {
                     return
@@ -31,24 +29,30 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
 
                 val qualifiedName = node.qualifiedName ?: return
 
-                val annotationTarget = node.findAlphabeticalAnnotation(searchSuperTypes = SEARCH_SUPER_TYPES.getValue(context)) ?: return
+                val annotationTarget =
+                    node.findAlphabeticalAnnotation(
+                        searchSuperTypes = SEARCH_SUPER_TYPES.getValue(context),
+                    ) ?: return
 
-                val classDeclarations = node.uastDeclarations
-                    .filterIsInstance<UClass>()
-                    .filter {
-                        context.evaluator.extendsClass(it, qualifiedName)
-                    }
+                val classDeclarations =
+                    node.uastDeclarations
+                        .filterIsInstance<UClass>()
+                        .filter {
+                            context.evaluator.extendsClass(it, qualifiedName)
+                        }
 
-                val zipped = classDeclarations.sortedBy { it.name }
-                    .zip(
-                        classDeclarations,
-                    ) { sorted, unsorted ->
-                        Entry(expected = sorted, actual = unsorted)
-                    }
+                val zipped =
+                    classDeclarations.sortedBy { it.name }
+                        .zip(
+                            classDeclarations,
+                        ) { sorted, unsorted ->
+                            Entry(expected = sorted, actual = unsorted)
+                        }
 
-                val outOfOrder = zipped.firstOrNull {
-                    it.expected.name != it.actual.name
-                } ?: return
+                val outOfOrder =
+                    zipped.firstOrNull {
+                        it.expected.name != it.actual.name
+                    } ?: return
 
                 context.report(
                     issue = ISSUE,
@@ -69,7 +73,8 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
                     append("since its super type `${annotationTarget.name}` ")
                 }
                 append("is annotated with `@Alphabetical`. ")
-                append("Rearrange so that ${entry.expected.name} is before ${entry.actual.name}.")
+                append("Rearrange so that ${entry.expected.name} ")
+                append("is before ${entry.actual.name}.")
             }
         }
     }
@@ -84,34 +89,40 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
     }
 
     companion object {
-
-        val SEARCH_SUPER_TYPES = BooleanOption(
-            name = "searchSuperTypes",
-            description = "Whether to search through super types (interfaces and abstract classes) for the @Alphabetical annotation",
-            defaultValue = true,
-            explanation = "Settings this to `false` means your sealed types **must** have the annotation " +
-                "explicitly on their declaration. In other words, it disables the behavior where extending an " +
-                "type decorated with annotation will check the current sealed type for alphabetical order. " +
-                "This *may* be more performant depending on your project.",
-        )
+        val SEARCH_SUPER_TYPES =
+            BooleanOption(
+                name = "searchSuperTypes",
+                description = "Whether to search through super types (interfaces and abstract classes) for the @Alphabetical annotation",
+                defaultValue = true,
+                explanation =
+                    "Settings this to `false` means your sealed types **must** have the annotation " +
+                        "explicitly on their declaration. In other words, it disables the behavior where extending an " +
+                        "type decorated with annotation will check the current sealed type for alphabetical order. " +
+                        "This *may* be more performant depending on your project.",
+            )
 
         @JvmField
-        val ISSUE = Issue.create(
-            id = "SealedSubtypeOrder",
-            briefDescription = "Sealed subtype order",
-            explanation = "Keeping sealed subtype declarations in alphabetical order, where appropriate, " + "enables quick scanning of a file containing sealed types and prevents " + "merge conflicts.",
-            implementation = Implementation(
-                SealedSubtypeOrderDetector::class.java,
-                EnumSet.of(
-                    Scope.JAVA_FILE,
-                    Scope.TEST_SOURCES,
-                ),
-                EnumSet.of(Scope.JAVA_FILE),
-                EnumSet.of(Scope.TEST_SOURCES),
-            ),
-            category = Category.PRODUCTIVITY,
-            priority = 5,
-            severity = Severity.ERROR,
-        ).setOptions(listOf(SEARCH_SUPER_TYPES))
+        val ISSUE =
+            Issue.create(
+                id = "SealedSubtypeOrder",
+                briefDescription = "Sealed subtype order",
+                explanation =
+                    "Keeping sealed subtype declarations in alphabetical order, where appropriate, " +
+                        "enables quick scanning of a file containing sealed types and prevents " +
+                        "merge conflicts.",
+                implementation =
+                    Implementation(
+                        SealedSubtypeOrderDetector::class.java,
+                        EnumSet.of(
+                            Scope.JAVA_FILE,
+                            Scope.TEST_SOURCES,
+                        ),
+                        EnumSet.of(Scope.JAVA_FILE),
+                        EnumSet.of(Scope.TEST_SOURCES),
+                    ),
+                category = Category.PRODUCTIVITY,
+                priority = 5,
+                severity = Severity.ERROR,
+            ).setOptions(listOf(SEARCH_SUPER_TYPES))
     }
 }

@@ -21,13 +21,11 @@ import org.jetbrains.uast.resolveToUElement
 import java.util.EnumSet
 
 class VarargOrderDetector : Detector(), SourceCodeScanner {
-
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
         listOf(UCallExpression::class.java, UQualifiedReferenceExpression::class.java)
 
     override fun createUastHandler(context: JavaContext): UElementHandler {
         return object : UElementHandler() {
-
             /**
              * Qualified reference expressions with the annotation where need
              * to search for children with vararg arguments e.g.,
@@ -62,12 +60,13 @@ class VarargOrderDetector : Detector(), SourceCodeScanner {
                     annotatedQualifiedExpressions.remove(annotatedParent)
                 }
 
-                val zipped = node.valueArguments.sortedBy { it.sourcePsi?.text.orEmpty() }
-                    .zip(
-                        node.valueArguments,
-                    ) { sorted, unsorted ->
-                        Entry(expected = sorted, actual = unsorted)
-                    }
+                val zipped =
+                    node.valueArguments.sortedBy { it.sourcePsi?.text.orEmpty() }
+                        .zip(
+                            node.valueArguments,
+                        ) { sorted, unsorted ->
+                            Entry(expected = sorted, actual = unsorted)
+                        }
 
                 val outOfOrder =
                     zipped.firstOrNull { it.expectedText != it.actualText }
@@ -76,8 +75,9 @@ class VarargOrderDetector : Detector(), SourceCodeScanner {
                 context.report(
                     issue = ISSUE,
                     location = context.getLocation(node),
-                    message = "Vararg out of alphabetical order. Rearrange so that " +
-                        "`${outOfOrder.expectedText}` is before `${outOfOrder.actualText}`",
+                    message =
+                        "Vararg out of alphabetical order. Rearrange so that " +
+                            "`${outOfOrder.expectedText}` is before `${outOfOrder.actualText}`",
                 )
             }
         }
@@ -89,6 +89,7 @@ class VarargOrderDetector : Detector(), SourceCodeScanner {
     ) {
         val expectedText = expected.sourcePsi?.text.orEmpty()
         val actualText = actual.sourcePsi?.text.orEmpty()
+
         override fun toString(): String {
             return "Entry(expected='$expectedText', actual='$actualText')"
         }
@@ -96,23 +97,26 @@ class VarargOrderDetector : Detector(), SourceCodeScanner {
 
     companion object {
         @JvmField
-        val ISSUE = Issue.create(
-            id = "VarargOrder",
-            briefDescription = "Vararg order",
-            explanation = "Keeping vararg in alphabetical order, where appropriate, " +
-                "enables quick scanning of the arguments.",
-            implementation = Implementation(
-                VarargOrderDetector::class.java,
-                EnumSet.of(
-                    Scope.JAVA_FILE,
-                    Scope.TEST_SOURCES,
-                ),
-                EnumSet.of(Scope.JAVA_FILE),
-                EnumSet.of(Scope.TEST_SOURCES),
-            ),
-            category = Category.PRODUCTIVITY,
-            priority = 5,
-            severity = Severity.ERROR,
-        )
+        val ISSUE =
+            Issue.create(
+                id = "VarargOrder",
+                briefDescription = "Vararg order",
+                explanation =
+                    "Keeping vararg in alphabetical order, where appropriate, " +
+                        "enables quick scanning of the arguments.",
+                implementation =
+                    Implementation(
+                        VarargOrderDetector::class.java,
+                        EnumSet.of(
+                            Scope.JAVA_FILE,
+                            Scope.TEST_SOURCES,
+                        ),
+                        EnumSet.of(Scope.JAVA_FILE),
+                        EnumSet.of(Scope.TEST_SOURCES),
+                    ),
+                category = Category.PRODUCTIVITY,
+                priority = 5,
+                severity = Severity.ERROR,
+            )
     }
 }
