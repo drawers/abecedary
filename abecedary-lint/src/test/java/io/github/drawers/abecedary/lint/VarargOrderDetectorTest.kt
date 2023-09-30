@@ -10,7 +10,6 @@ import io.github.drawers.abecedary.lint.Stubs.ALPHABETICAL
 import org.junit.Test
 
 class VarargOrderDetectorTest {
-
     @Test
     fun inOrder() {
         lint()

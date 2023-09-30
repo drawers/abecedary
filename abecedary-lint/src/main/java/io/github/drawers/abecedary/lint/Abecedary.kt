@@ -23,11 +23,12 @@ fun UClass.findAlphabeticalAnnotation(searchSuperTypes: Boolean): PsiClass? {
     }
 
     // check for implicit annotation through supertypes
-    val superTypes = uastSuperTypes.mapNotNull {
-        it.type as? PsiClassReferenceType
-    }.mapNotNull {
-        it.resolve()
-    }
+    val superTypes =
+        uastSuperTypes.mapNotNull {
+            it.type as? PsiClassReferenceType
+        }.mapNotNull {
+            it.resolve()
+        }
 
     // BFS because we assume the annotation
     // will be found close to the root

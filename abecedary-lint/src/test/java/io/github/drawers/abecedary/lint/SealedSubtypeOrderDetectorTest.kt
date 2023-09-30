@@ -8,7 +8,6 @@ import io.github.drawers.abecedary.lint.Stubs.ALPHABETICAL
 import org.junit.Test
 
 class SealedSubtypeOrderDetectorTest {
-
     @Test
     fun subclassOutOfOrder() {
         lint()
