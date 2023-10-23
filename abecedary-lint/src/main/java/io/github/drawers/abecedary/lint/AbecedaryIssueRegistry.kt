@@ -17,6 +17,7 @@ class AbecedaryIssueRegistry : IssueRegistry() {
 
     override val issues: List<Issue> =
         listOf(
+            BlockOrderDetector.ISSUE,
             EnumEntryOrderDetector.ISSUE,
             SealedSubtypeOrderDetector.ISSUE,
             VarargOrderDetector.ISSUE,
