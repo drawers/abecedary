@@ -7,7 +7,7 @@ lint = "31.2.0-rc01"
 lintJvmTarget = "17"
 runtimeJvmTarget = "11"
 agp = "8.2.0-rc01"
-kotlin1820 = "1.8.20"
+kotlin1820 = "1.9.22"
 
 [plugins]
 lint = { id = "com.android.lint", version = "8.1.2" }
