@@ -22,15 +22,21 @@ lint {
 
 dependencies {
     compileOnly(libs.lint.api)
+    compileOnly(libs.lint.checks)
     testImplementation(libs.lint.tests)
+    testImplementation(libs.lint.checks)
     testImplementation(libs.junit4)
 }
+val lintKotlinVersion = KotlinVersion(1, 9, 23)
+
+val kgpKotlinVersion =
+    KotlinVersion.fromVersion(lintKotlinVersion.toString().substringBeforeLast('.'))
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         // Lint forces Kotlin (regardless of what version the project uses), so this
         // forces a matching language level for now. Similar to `targetCompatibility` for Java.
-        apiVersion.set(KotlinVersion.KOTLIN_1_8)
-        languageVersion.set(KotlinVersion.KOTLIN_1_8)
+        apiVersion.set(kgpKotlinVersion)
+        languageVersion.set(kgpKotlinVersion)
     }
 }

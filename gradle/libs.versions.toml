@@ -1,22 +1,22 @@
 [versions]
-jdk = "19"
+jdk = "17"
 junit4 = "4.13.2"
 ktlint = "0.50.0"
-lint = "31.2.0-rc01"
+lint = "31.5.0"
 # lint checks must target JDK 17, but the runtime should remain 11
 lintJvmTarget = "17"
 runtimeJvmTarget = "11"
-agp = "8.2.0-rc01"
-kotlin1820 = "1.8.20"
+agp = "8.5.0"
+kotlin = "1.9.23"
 
 [plugins]
-lint = { id = "com.android.lint", version = "8.1.2" }
-dokka = { id = "org.jetbrains.dokka", version = "1.9.10" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.25.3" }
+lint = { id = "com.android.lint", version = "8.5.0" }
+dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.29.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-spotless = { id = "com.diffplug.spotless", version = "6.22.0" }
-kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin1820" }
+spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [libraries]
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }

@@ -17,8 +17,6 @@ class VarargOrderDetectorTest {
             .skipTestModes(
                 // TestMode.PARENTHESIZED introduces a syntax error, let's skip it
                 TestMode.PARENTHESIZED,
-                // TestMode.UI_INJECTION_HOST introduces slightly different messages, let's skip it
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -44,7 +42,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -71,7 +68,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -103,7 +99,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -143,7 +138,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -174,7 +168,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -198,7 +191,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -228,7 +220,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -260,7 +251,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -292,7 +282,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .testModes(TestMode.DEFAULT)
             .files(
@@ -323,7 +312,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .testModes(TestMode.DEFAULT)
             .files(
@@ -359,7 +347,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .testModes(TestMode.DEFAULT)
             .files(
@@ -391,7 +378,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -422,7 +408,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
@@ -449,7 +434,6 @@ class VarargOrderDetectorTest {
             .issues(VarargOrderDetector.ISSUE)
             .skipTestModes(
                 TestMode.PARENTHESIZED,
-                TestMode.UI_INJECTION_HOST,
             )
             .files(
                 ALPHABETICAL,
