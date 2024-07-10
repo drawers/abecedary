@@ -20,6 +20,7 @@ enum class Fruit(override val id: Int) : Identifiable {
 
 sealed class Vegetable : Edible {
     object Carrot : Vegetable()
+
     object Daikon : Vegetable()
 }
 
