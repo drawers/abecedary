@@ -59,7 +59,7 @@ class VarargOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
-            .expectContains("Rearrange so that apple is before banana")
+            .expectContains("Rearrange so that \"apple\" is before \"banana\"")
     }
 
     @Test
@@ -129,7 +129,7 @@ class VarargOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
-            .expectContains("Rearrange so that apple is before banana")
+            .expectContains("Rearrange so that \"apple\" is before \"banana\"")
     }
 
     @Test
@@ -159,7 +159,7 @@ class VarargOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
-            .expectContains("Rearrange so that apple is before banana")
+            .expectContains("Rearrange so that \"apple\" is before \"banana\"")
     }
 
     @Test
@@ -303,7 +303,7 @@ class VarargOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
-            .expectContains("Rearrange so that a is before c")
+            .expectContains("Rearrange so that \"a\" is before \"c\"")
     }
 
     @Test
@@ -338,7 +338,7 @@ class VarargOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
-            .expectContains("Rearrange so that a is before c")
+            .expectContains("Rearrange so that \"a\" is before \"c\"")
     }
 
     @Test
@@ -369,7 +369,7 @@ class VarargOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
-            .expectContains("Rearrange so that a is before c")
+            .expectContains("Rearrange so that \"a\" is before \"c\"")
     }
 
     @Test
