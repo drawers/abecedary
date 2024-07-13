@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.github.drawers.abecedary.lint
 
-import com.android.tools.lint.client.api.UElementHandler
-import com.android.tools.lint.detector.api.BooleanOption
+import com.android.tools.lint.detector.api.AnnotationInfo
+import com.android.tools.lint.detector.api.AnnotationUsageInfo
+import com.android.tools.lint.detector.api.AnnotationUsageType
 import com.android.tools.lint.detector.api.Category
+import com.android.tools.lint.detector.api.Context
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
@@ -14,99 +16,57 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiEnumConstant
-import com.intellij.psi.util.childrenOfType
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.kotlin.KotlinUEnumConstant
 import java.util.EnumSet
 
+@Suppress("UnstableApiUsage")
 class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
-    override fun getApplicableUastTypes(): List<Class<out UElement>> =
-        listOf(
-            UClass::class.java,
-        )
+    override fun applicableAnnotations(): List<String> = listOf("Alphabetical")
 
-    override fun createUastHandler(context: JavaContext): UElementHandler {
-        return object : UElementHandler() {
-            override fun visitClass(node: UClass) {
-                if (!node.isEnum) {
-                    return
-                }
+    override fun isApplicableAnnotationUsage(type: AnnotationUsageType): Boolean {
+        return true
+    }
 
-                val annotationTarget =
-                    node.findAlphabeticalAnnotation(
-                        searchSuperTypes = SEARCH_SUPER_INTERFACES.getValue(context),
-                    ) ?: return
+    private val classToEnumConstants = hashMapOf<UClass, MutableList<Entry>>()
 
-                val entries = node.kotlinEnumEntries() ?: node.javaEnumEntries()
-                if (entries.isEmpty()) return
-
-                val zipped =
-                    entries.sorted()
-                        .zip(entries) { sorted, unsorted ->
-                            Order(
-                                expected = sorted,
-                                actual = unsorted,
-                            )
-                        }
-
-                val outOfOrder =
-                    zipped.firstOrNull {
-                        it.expected.name != it.actual.name
-                    } ?: return
-
-                context.report(
-                    issue = ISSUE,
-                    location = context.getLocation(node as UElement),
-                    message = buildMessage(node, annotationTarget, outOfOrder),
-                    quickfixData = null,
-                )
-            }
-
-            private fun buildMessage(
-                enum: PsiClass,
-                annotationTarget: PsiClass,
-                outOfOrder: Order,
-            ) = buildString {
-                append("`${enum.name}` should declare its entries in alphabetical order ")
-                if (enum == annotationTarget) {
-                    append("since it ")
-                } else {
-                    append("since its super interface `${annotationTarget.name}` ")
-                }
-                append("is annotated with `@Alphabetical`. ")
-                append("Rearrange so that ${outOfOrder.expected.name} ")
-                append("is before ${outOfOrder.actual.name}.")
-            }
-
-            /**
-             * Returns the list of Kotlin enum entries or `null` if
-             * this is not applicable (e.g., because we are inspecting
-             * a Java class).
-             */
-            private fun UClass.kotlinEnumEntries(): List<Entry>? {
-                val ktClass = sourcePsi as? KtClass ?: return null
-                return ktClass.body
-                    ?.enumEntries
-                    ?.map {
-                        Entry(
-                            node = it,
-                            name = it.name.orEmpty(),
-                        )
-                    }
-            }
-
-            private fun UClass.javaEnumEntries(): List<Entry> {
-                return javaPsi.childrenOfType<PsiEnumConstant>()
-                    .map {
-                        Entry(
-                            node = it,
-                            name = it.name,
-                        )
-                    }
-            }
+    override fun afterCheckFile(context: Context) {
+        for (uClass in classToEnumConstants.keys) {
+            val entries = classToEnumConstants[uClass].orEmpty()
+            val outOfOrder = entries.firstOutOfOrder() ?: continue
+            context.report(
+                issue = ISSUE,
+                location = context.getLocation(outOfOrder.actual.node),
+                message = buildMessage(uClass, outOfOrder),
+                quickfixData = null,
+            )
         }
+        classToEnumConstants.clear()
+    }
+
+    @Suppress("UnstableApiUsage")
+    override fun visitAnnotationUsage(
+        context: JavaContext,
+        element: UElement,
+        annotationInfo: AnnotationInfo,
+        usageInfo: AnnotationUsageInfo,
+    ) {
+        val enumConstant = element as? KotlinUEnumConstant ?: return
+        val parentClass = enumConstant.getParentOfType<UClass>(strict = true) ?: return
+
+        classToEnumConstants.getOrPut(parentClass) { mutableListOf() }
+            .add(Entry(enumConstant, name = enumConstant.name))
+    }
+
+    private fun buildMessage(
+        enum: PsiClass,
+        outOfOrder: Order,
+    ) = buildString {
+        append("`${enum.name}` should declare its entries in alphabetical order. ")
+        append("Rearrange so that ${outOfOrder.expected.name} ")
+        append("is before ${outOfOrder.actual.name}.")
     }
 
     private data class Entry(
@@ -123,19 +83,16 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         val actual: Entry,
     )
 
-    companion object {
-        val SEARCH_SUPER_INTERFACES =
-            BooleanOption(
-                name = "searchSuperInterfaces",
-                description = "Whether to search through super interfaces for the @Alphabetical annotation",
-                defaultValue = true,
-                explanation =
-                    "Settings this to `false` means your enums **must** have the annotation " +
-                        "explicitly on their declaration. In other words, it disables the behavior where extending an " +
-                        "interface decorated with annotation will check the current enum for alphabetical order. " +
-                        "This *may* be more performant depending on your project.",
-            )
+    private fun List<Entry>.firstOutOfOrder(): Order? {
+        for (i in 1 until size) {
+            if (get(i - 1).name > get(i).name) {
+                return Order(expected = get(i), actual = get(i - 1))
+            }
+        }
+        return null
+    }
 
+    companion object {
         @JvmField
         val ISSUE =
             Issue.create(
@@ -158,6 +115,6 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
                 category = Category.PRODUCTIVITY,
                 priority = 5,
                 severity = Severity.ERROR,
-            ).setOptions(listOf(SEARCH_SUPER_INTERFACES))
+            )
     }
 }
