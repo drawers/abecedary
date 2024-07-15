@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.github.drawers.abecedary.lint
 
-import com.android.tools.lint.client.api.UElementHandler
-import com.android.tools.lint.detector.api.BooleanOption
+import com.android.tools.lint.detector.api.AnnotationInfo
+import com.android.tools.lint.detector.api.AnnotationUsageInfo
+import com.android.tools.lint.detector.api.AnnotationUsageType
 import com.android.tools.lint.detector.api.Category
+import com.android.tools.lint.detector.api.Context
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
@@ -15,92 +17,140 @@ import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiClass
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.kotlin.KotlinUTypeReferenceExpression
 import java.util.EnumSet
 
 class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
-    override fun getApplicableUastTypes(): List<Class<out UElement>> = listOf(UClass::class.java)
-
-    override fun createUastHandler(context: JavaContext): UElementHandler {
-        return object : UElementHandler() {
-            override fun visitClass(node: UClass) {
-                if (!context.evaluator.isSealed(node)) {
-                    return
-                }
-
-                val qualifiedName = node.qualifiedName ?: return
-
-                val annotationTarget =
-                    node.findAlphabeticalAnnotation(
-                        searchSuperTypes = SEARCH_SUPER_TYPES.getValue(context),
-                    ) ?: return
-
-                val classDeclarations =
-                    node.uastDeclarations
-                        .filterIsInstance<UClass>()
-                        .filter {
-                            context.evaluator.extendsClass(it, qualifiedName)
-                        }
-
-                val zipped =
-                    classDeclarations.sortedBy { it.name }
-                        .zip(
-                            classDeclarations,
-                        ) { sorted, unsorted ->
-                            Entry(expected = sorted, actual = unsorted)
-                        }
-
-                val outOfOrder =
-                    zipped.firstOrNull {
-                        it.expected.name != it.actual.name
-                    } ?: return
-
-                context.report(
-                    issue = ISSUE,
-                    location = context.getLocation(node as UElement),
-                    message = buildMessage(node, annotationTarget, outOfOrder),
-                )
-            }
-
-            private fun buildMessage(
-                sealedType: PsiClass,
-                annotationTarget: PsiClass,
-                entry: Entry,
-            ) = buildString {
-                append("`${sealedType.name}` should declare its entries in alphabetical order ")
-                if (sealedType == annotationTarget) {
-                    append("since it ")
-                } else {
-                    append("since its super type `${annotationTarget.name}` ")
-                }
-                append("is annotated with `@Alphabetical`. ")
-                append("Rearrange so that ${entry.expected.name} ")
-                append("is before ${entry.actual.name}.")
-            }
-        }
+    override fun isApplicableAnnotationUsage(type: AnnotationUsageType): Boolean {
+        return type == AnnotationUsageType.EXTENDS
     }
 
-    private data class Entry(
+    override fun applicableAnnotations(): List<String> = listOf("Alphabetical")
+
+    private val classToSealedSubTypes = hashMapOf<ClassInfo, MutableList<UClass>>()
+
+    override fun afterCheckFile(context: Context) {
+        for (entry in classToSealedSubTypes.entries) {
+            val expectedActual = entry.value.firstOutOfOrder() ?: continue
+
+            context.report(
+                issue = ISSUE,
+                location = context.getLocation(expectedActual.actual as UElement),
+                message =
+                    buildMessage(
+                        sealedType = entry.key.sealedOuter,
+                        annotated = entry.key.annotatedClass,
+                        expectedActual = expectedActual,
+                    ),
+            )
+        }
+        classToSealedSubTypes.clear()
+    }
+
+    @Suppress("UnstableApiUsage", "ktlint:standard:no-consecutive-comments")
+    override fun visitAnnotationUsage(
+        context: JavaContext,
+        element: UElement,
+        annotationInfo: AnnotationInfo,
+        usageInfo: AnnotationUsageInfo,
+    ) {
+        /**
+         *     Consider the following code:
+         *
+         *     @Alphabetical
+         *     interface Edible
+         *
+         *     sealed class Fruit: Edible {
+         *         object Banana: Fruit()
+         *         object Apple: Fruit()
+         *     }
+         *
+         */
+
+        // `Fruit` in the example
+        val typeReference = element as? KotlinUTypeReferenceExpression ?: return
+
+        // `Banana` in the example
+        val sealedSubType = typeReference.getParentOfType<UClass>() ?: return
+
+        // `Edible` in the example
+        val annotatedClass =
+            annotationInfo.annotation.getParentOfType<UClass>() ?: return
+
+        // `Fruit` in the example
+        val outerClass = sealedSubType.getParentOfType<UClass>() ?: return
+        if (!context.evaluator.isSealed(outerClass)) return
+
+        classToSealedSubTypes.getOrPut(
+            ClassInfo(
+                sealedOuter = outerClass,
+                annotatedClass = annotatedClass,
+            ),
+        ) { mutableListOf() }
+            .add(sealedSubType)
+    }
+
+    private fun buildMessage(
+        sealedType: PsiClass,
+        annotated: PsiClass,
+        expectedActual: ExpectedActual,
+    ) = buildString {
+        append("`${sealedType.name}` should declare its entries in alphabetical order ")
+        if (sealedType == annotated) {
+            append("since it ")
+        } else {
+            append("since its super type `${annotated.name}` ")
+        }
+        append("is annotated with `@Alphabetical`. ")
+        append("Rearrange so that ${expectedActual.expected.name} ")
+        append("is before ${expectedActual.actual.name}.")
+    }
+
+    private data class ClassInfo(
+        /**
+         * The sealed parent that has its declarations out of order.
+         *
+         * In the following example, it would be `Fruit`:
+         *
+         *     @Alphabetical
+         *     sealed class Fruit {
+         *         object Banana: Fruit()
+         *         object Apple: Fruit()
+         *     }
+         */
+        val sealedOuter: UClass,
+        /**
+         * Class or interface annotated with the explicit @Alphabetical annotation.
+         *
+         * In the following example, it would be `Edible`:
+         *
+         *     @Alphabetical
+         *     interface Edible
+         *
+         *     sealed class Fruit: Edible {
+         *         object Banana: Fruit()
+         *         object Apple: Fruit()
+         *     }
+         */
+        val annotatedClass: PsiClass,
+    )
+
+    private data class ExpectedActual(
         val expected: UClass,
         val actual: UClass,
-    ) {
-        override fun toString(): String {
-            return "Entry(expected=${expected.name}, actual=${actual.name})"
+    )
+
+    private fun List<UClass>.firstOutOfOrder(): ExpectedActual? {
+        for (i in 1 until size) {
+            if (get(i - 1).name.orEmpty() > get(i).name.orEmpty()) {
+                return ExpectedActual(expected = get(i), actual = get(i - 1))
+            }
         }
+        return null
     }
 
     companion object {
-        val SEARCH_SUPER_TYPES =
-            BooleanOption(
-                name = "searchSuperTypes",
-                description = "Whether to search through super types (interfaces and abstract classes) for the @Alphabetical annotation",
-                defaultValue = true,
-                explanation =
-                    "Settings this to `false` means your sealed types **must** have the annotation " +
-                        "explicitly on their declaration. In other words, it disables the behavior where extending an " +
-                        "type decorated with annotation will check the current sealed type for alphabetical order. " +
-                        "This *may* be more performant depending on your project.",
-            )
-
         @JvmField
         val ISSUE =
             Issue.create(
@@ -123,6 +173,6 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
                 category = Category.PRODUCTIVITY,
                 priority = 5,
                 severity = Severity.ERROR,
-            ).setOptions(listOf(SEARCH_SUPER_TYPES))
+            )
     }
 }
