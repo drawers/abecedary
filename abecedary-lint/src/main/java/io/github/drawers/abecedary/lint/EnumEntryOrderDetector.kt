@@ -30,16 +30,15 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         return true
     }
 
-    private val classToEnumConstants = hashMapOf<UClass, MutableList<Entry>>()
+    private val classToEnumConstants = hashMapOf<ClassInfo, MutableList<Entry>>()
 
     override fun afterCheckFile(context: Context) {
-        for (uClass in classToEnumConstants.keys) {
-            val entries = classToEnumConstants[uClass].orEmpty()
-            val outOfOrder = entries.firstOutOfOrder() ?: continue
+        for (entry in classToEnumConstants.entries) {
+            val outOfOrder = entry.value.firstOutOfOrder() ?: continue
             context.report(
                 issue = ISSUE,
                 location = context.getLocation(outOfOrder.actual.node),
-                message = buildMessage(uClass, outOfOrder),
+                message = buildMessage(entry.key.enum, entry.key.annotatedClass, outOfOrder),
                 quickfixData = null,
             )
         }
@@ -54,20 +53,47 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         usageInfo: AnnotationUsageInfo,
     ) {
         val enumConstant = element as? KotlinUEnumConstant ?: return
-        val parentClass = enumConstant.getParentOfType<UClass>(strict = true) ?: return
+        val enumParent = enumConstant.getParentOfType<UClass>(strict = true) ?: return
+        val annotatedClass =
+            annotationInfo.annotation.getParentOfType<UClass>() ?: return
 
-        classToEnumConstants.getOrPut(parentClass) { mutableListOf() }
+        classToEnumConstants.getOrPut(ClassInfo(enum = enumParent, annotatedClass)) { mutableListOf() }
             .add(Entry(enumConstant, name = enumConstant.name))
     }
 
     private fun buildMessage(
-        enum: PsiClass,
+        enumClass: UClass,
+        annotatedClass: PsiClass,
         outOfOrder: Order,
     ) = buildString {
-        append("`${enum.name}` should declare its entries in alphabetical order. ")
+        append("`${enumClass.name}` should declare its entries in alphabetical order ")
+        if (enumClass == annotatedClass) {
+            append("since it ")
+        } else {
+            append("since its super interface `${annotatedClass.name}` ")
+        }
+        append("is annotated with `@Alphabetical`. ")
         append("Rearrange so that ${outOfOrder.expected.name} ")
         append("is before ${outOfOrder.actual.name}.")
     }
+
+    private data class ClassInfo(
+        val enum: UClass,
+        /**
+         * Class or interface annotated with the explicit @Alphabetical annotation.
+         *
+         * In the following example, it would be `Edible`:
+         *
+         *     @Alphabetical
+         *     interface Edible
+         *
+         *     enum class Fruit: Edible {
+         *         BANANA,
+         *         APPLE
+         *     }
+         */
+        val annotatedClass: PsiClass,
+    )
 
     private data class Entry(
         val node: PsiElement,
