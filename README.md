@@ -20,8 +20,7 @@ println("rock ${Planet.EARTH.ordinal + 1} from the sun") // rock 3 from the sun
 println("${Planet.MERCURY < Planet.VENUS}") // true
 ```
 
-In others, order is arbitrary and we just want a set of constants
-with exhaustiveness:
+In others, order is arbitrary and we just want to group a set of related constants:
 
 ```kotlin
 enum class CatalogFeature(override val id: String) : Feature {
@@ -172,7 +171,12 @@ val specialList = SpecialList("a", "b", "c")
 @Alphabetical specialList.addAll("f", "e", "d")
 ```
 
-### Installation
+### Ordering `.gradle` and `.gradle.kts` files
+
+If you are interested in keeping build files tidy, the solution is in another castle:
+https://github.com/square/gradle-dependencies-sorter
+
+## Installation
 
 Just add the annotation artifact as `compileOnly` and the lint artifact to the `lintChecks`
 configuration.
@@ -189,15 +193,15 @@ dependencies {
 | abecedary-annotation | [![Maven Central](https://img.shields.io/maven-central/v/io.github.drawers/abecedary-annotation.svg)](https://mvnrepository.com/artifact/io.github.drawers/abecedary-annotation) |
 | abecedary-lint       | [![Maven Central](https://img.shields.io/maven-central/v/io.github.drawers/abecedary-lint.svg)](https://mvnrepository.com/artifact/io.github.drawers/abecedary-lint)             |
 
-
 Note for non-android projects, you must apply the `com.android.lint` Gradle plugin to
 use `lintChecks`.
 
-#### Compatibility
+### Compatibility
 
 | Abecedary version | Lint version  |
 |-------------------|---------------|
 | 0.2.0             | 31.2.0-beta01 |
+| 0.3.0             | 31.5.0        |
 
 Remember that lint versions are tied to Android Gradle Plugin (AGP) versions:
 
@@ -212,27 +216,6 @@ instructions [here](https://googlesamples.github.io/android-custom-lint-rules/us
 Problems with the Abecedary checks not showing in the IDE can sometimes be solved by using a newer
 version of lint or by upgrading to a more recent version of Android Studio.
 
-### Configuration
-
-You can configure the lint rules via
-a [lint.xml](https://googlesamples.github.io/android-custom-lint-rules/api-guide.html#options):
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<lint>
-    <issue id="EnumEntryOrder">
-        <option name="searchSuperInterfaces" value="false" />
-    </issue>
-    <issue id="SealedSubtypeOrder">
-        <option name="searchSuperTypes" value="false" />
-    </issue>
-</lint>
-```
-
-This currently allows you to opt-out of searching supertypes for
-the `@Alphabetical` annotation if you believe this will be more
-performant for your project.
-
 ## Philosophy
 
 ### Easy to clone and fork
@@ -243,7 +226,7 @@ https://twitter.com/JimSproch/status/1656143262804217860
 
 There are many projects with their own custom lint rules.
 It should be easy for these projects to copy/paste Abecedary code into their own rule sets in order
-to avoid an extra dependency on a 3rd party library.
+to avoid an extra dependency on a 3rd party library or incompatibility issues with Kotlin/lint.
 
 This means that a design where Abecedary abstracts over lint was considered and discarded.
 
