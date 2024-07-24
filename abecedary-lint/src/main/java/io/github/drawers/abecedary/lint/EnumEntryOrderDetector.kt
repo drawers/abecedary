@@ -35,7 +35,7 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
     override fun afterCheckFile(context: Context) {
         for (entry in classToEnumConstants.entries) {
             // Sort entries so that the instruction for
-            // rearranging gives the minimum number of inversions
+            // rearranging is convenient:
             // i.e., when we have C, B, A it should direct the user
             // to put A before C rather than B before C
 

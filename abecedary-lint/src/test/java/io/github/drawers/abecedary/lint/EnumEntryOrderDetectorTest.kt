@@ -44,6 +44,7 @@ class EnumEntryOrderDetectorTest {
 
                         @Alphabetical
                         enum class Fruit {
+                            CHERRY,
                             BANANA,
                             APPLE,
                         }
@@ -55,7 +56,7 @@ class EnumEntryOrderDetectorTest {
             .run()
             .expectErrorCount(1)
             .expectContains("it is annotated with @Alphabetical")
-            .expectContains("Rearrange so that APPLE is before BANANA")
+            .expectContains("Rearrange so that APPLE is before CHERRY")
     }
 
     @Test
@@ -74,6 +75,7 @@ class EnumEntryOrderDetectorTest {
                         interface Delicious: Edible
 
                         enum class Fruit: Delicious {
+                            CHERRY,
                             BANANA,
                             APPLE,
                         }
@@ -85,7 +87,7 @@ class EnumEntryOrderDetectorTest {
             .run()
             .expectErrorCount(1)
             .expectContains("its super interface Edible is annotated with @Alphabetical")
-            .expectContains("Rearrange so that APPLE is before BANANA")
+            .expectContains("Rearrange so that APPLE is before CHERRY")
     }
 
     @Test
