@@ -39,12 +39,13 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
             // i.e., when we have C, B, A it should direct the user
             // to put A before C rather than B before C
 
-            val zipped = entry.value.sorted().zip(entry.value) { sorted, unsorted ->
-                Order(
-                    expected = sorted,
-                    actual = unsorted,
-                )
-            }
+            val zipped =
+                entry.value.sorted().zip(entry.value) { sorted, unsorted ->
+                    Order(
+                        expected = sorted,
+                        actual = unsorted,
+                    )
+                }
             val outOfOrder = zipped.firstOrNull { it.expected.name != it.actual.name } ?: return
             context.report(
                 issue = ISSUE,
@@ -71,8 +72,8 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         classToEnumConstants.getOrPut(
             EnumInfo(
                 enum = enumParent,
-                annotatedClass
-            )
+                annotatedClass,
+            ),
         ) { mutableListOf() }
             .add(Entry(enumConstant, name = enumConstant.name))
     }
@@ -133,19 +134,19 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
                 id = "EnumEntryOrder",
                 briefDescription = "Enum entry order",
                 explanation =
-                "Keeping enum entries in alphabetical order, where appropriate, " +
+                    "Keeping enum entries in alphabetical order, where appropriate, " +
                         "enables quick scanning of a file containing enums and prevents " +
                         "merge conflicts.",
                 implementation =
-                Implementation(
-                    EnumEntryOrderDetector::class.java,
-                    EnumSet.of(
-                        Scope.JAVA_FILE,
-                        Scope.TEST_SOURCES,
+                    Implementation(
+                        EnumEntryOrderDetector::class.java,
+                        EnumSet.of(
+                            Scope.JAVA_FILE,
+                            Scope.TEST_SOURCES,
+                        ),
+                        EnumSet.of(Scope.JAVA_FILE),
+                        EnumSet.of(Scope.TEST_SOURCES),
                     ),
-                    EnumSet.of(Scope.JAVA_FILE),
-                    EnumSet.of(Scope.TEST_SOURCES),
-                ),
                 category = Category.PRODUCTIVITY,
                 priority = 5,
                 severity = Severity.ERROR,
