@@ -20,6 +20,7 @@ class SealedSubtypeOrderDetectorTest {
 
                         @Alphabetical
                         sealed class Fruit {
+                            object Cherry: Fruit()
                             object Banana : Fruit()
                             object Apple : Fruit()
                         }
@@ -30,7 +31,7 @@ class SealedSubtypeOrderDetectorTest {
             .run()
             .expectErrorCount(1)
             .expectContains("it is annotated with @Alphabetical")
-            .expectContains("Rearrange so that Apple is before Banana")
+            .expectContains("Rearrange so that Apple is before Cherry")
     }
 
     @Test
@@ -45,6 +46,7 @@ class SealedSubtypeOrderDetectorTest {
 
                         @Alphabetical
                         sealed interface Fruit {
+                            object Cherry: Fruit
                             object Banana : Fruit
                             interface Apple : Fruit
                         }
@@ -54,7 +56,7 @@ class SealedSubtypeOrderDetectorTest {
             .allowMissingSdk()
             .run()
             .expectErrorCount(1)
-            .expectContains("Rearrange so that Apple is before Banana")
+            .expectContains("Rearrange so that Apple is before Cherry")
     }
 
     @Test

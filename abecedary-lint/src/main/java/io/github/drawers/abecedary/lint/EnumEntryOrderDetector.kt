@@ -46,7 +46,7 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
                         actual = unsorted,
                     )
                 }
-            val outOfOrder = zipped.firstOrNull { it.expected.name != it.actual.name } ?: return
+            val outOfOrder = zipped.firstOrNull { it.expected.name != it.actual.name } ?: continue
             context.report(
                 issue = ISSUE,
                 location = context.getLocation(outOfOrder.actual.node),
