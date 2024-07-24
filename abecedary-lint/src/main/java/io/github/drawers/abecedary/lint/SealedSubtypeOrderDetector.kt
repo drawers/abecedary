@@ -28,20 +28,25 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
 
     override fun applicableAnnotations(): List<String> = listOf("Alphabetical")
 
-    private val classToSealedSubTypes = hashMapOf<ClassInfo, MutableList<UClass>>()
+    private val classToSealedSubTypes = hashMapOf<SealedTypeInfo, MutableList<UClass>>()
 
     override fun afterCheckFile(context: Context) {
         for (entry in classToSealedSubTypes.entries) {
-            val expectedActual = entry.value.firstOutOfOrder() ?: continue
+            val zipped =
+                entry.value.sortedBy { it.name }.zip(entry.value) { sorted, unsorted ->
+                    Order(expected = sorted, actual = unsorted)
+                }
+            val firstOutOfOrder =
+                zipped.firstOrNull { it.expected.name != it.actual.name } ?: continue
 
             context.report(
                 issue = ISSUE,
-                location = context.getLocation(expectedActual.actual as UElement),
+                location = context.getLocation(firstOutOfOrder.actual as UElement),
                 message =
                     buildMessage(
                         sealedType = entry.key.sealedOuter,
                         annotated = entry.key.annotatedClass,
-                        expectedActual = expectedActual,
+                        expectedActual = firstOutOfOrder,
                     ),
             )
         }
@@ -83,7 +88,7 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
         if (!context.evaluator.isSealed(outerClass)) return
 
         classToSealedSubTypes.getOrPut(
-            ClassInfo(
+            SealedTypeInfo(
                 sealedOuter = outerClass,
                 annotatedClass = annotatedClass,
             ),
@@ -94,7 +99,7 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
     private fun buildMessage(
         sealedType: PsiClass,
         annotated: PsiClass,
-        expectedActual: ExpectedActual,
+        expectedActual: Order,
     ) = buildString {
         append("`${sealedType.name}` should declare its entries in alphabetical order ")
         if (sealedType == annotated) {
@@ -107,7 +112,7 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
         append("is before ${expectedActual.actual.name}.")
     }
 
-    private data class ClassInfo(
+    private data class SealedTypeInfo(
         /**
          * The sealed parent that has its declarations out of order.
          *
@@ -136,19 +141,10 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
         val annotatedClass: PsiClass,
     )
 
-    private data class ExpectedActual(
+    private data class Order(
         val expected: UClass,
         val actual: UClass,
     )
-
-    private fun List<UClass>.firstOutOfOrder(): ExpectedActual? {
-        for (i in 1 until size) {
-            if (get(i - 1).name.orEmpty() > get(i).name.orEmpty()) {
-                return ExpectedActual(expected = get(i), actual = get(i - 1))
-            }
-        }
-        return null
-    }
 
     companion object {
         @JvmField
