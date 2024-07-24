@@ -30,11 +30,22 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         return true
     }
 
-    private val classToEnumConstants = hashMapOf<ClassInfo, MutableList<Entry>>()
+    private val classToEnumConstants = hashMapOf<EnumInfo, MutableList<Entry>>()
 
     override fun afterCheckFile(context: Context) {
         for (entry in classToEnumConstants.entries) {
-            val outOfOrder = entry.value.firstOutOfOrder() ?: continue
+            // Sort entries so that the instruction for
+            // rearranging gives the minimum number of inversions
+            // i.e., when we have C, B, A it should direct the user
+            // to put A before C rather than B before C
+
+            val zipped = entry.value.sorted().zip(entry.value) { sorted, unsorted ->
+                Order(
+                    expected = sorted,
+                    actual = unsorted,
+                )
+            }
+            val outOfOrder = zipped.firstOrNull { it.expected.name != it.actual.name } ?: return
             context.report(
                 issue = ISSUE,
                 location = context.getLocation(outOfOrder.actual.node),
@@ -57,7 +68,12 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         val annotatedClass =
             annotationInfo.annotation.getParentOfType<UClass>() ?: return
 
-        classToEnumConstants.getOrPut(ClassInfo(enum = enumParent, annotatedClass)) { mutableListOf() }
+        classToEnumConstants.getOrPut(
+            EnumInfo(
+                enum = enumParent,
+                annotatedClass
+            )
+        ) { mutableListOf() }
             .add(Entry(enumConstant, name = enumConstant.name))
     }
 
@@ -77,7 +93,7 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         append("is before ${outOfOrder.actual.name}.")
     }
 
-    private data class ClassInfo(
+    private data class EnumInfo(
         val enum: UClass,
         /**
          * Class or interface annotated with the explicit @Alphabetical annotation.
@@ -95,6 +111,7 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         val annotatedClass: PsiClass,
     )
 
+    /** Data for an enum constant **/
     private data class Entry(
         val node: PsiElement,
         val name: String,
@@ -109,15 +126,6 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         val actual: Entry,
     )
 
-    private fun List<Entry>.firstOutOfOrder(): Order? {
-        for (i in 1 until size) {
-            if (get(i - 1).name > get(i).name) {
-                return Order(expected = get(i), actual = get(i - 1))
-            }
-        }
-        return null
-    }
-
     companion object {
         @JvmField
         val ISSUE =
@@ -125,19 +133,19 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
                 id = "EnumEntryOrder",
                 briefDescription = "Enum entry order",
                 explanation =
-                    "Keeping enum entries in alphabetical order, where appropriate, " +
+                "Keeping enum entries in alphabetical order, where appropriate, " +
                         "enables quick scanning of a file containing enums and prevents " +
                         "merge conflicts.",
                 implementation =
-                    Implementation(
-                        EnumEntryOrderDetector::class.java,
-                        EnumSet.of(
-                            Scope.JAVA_FILE,
-                            Scope.TEST_SOURCES,
-                        ),
-                        EnumSet.of(Scope.JAVA_FILE),
-                        EnumSet.of(Scope.TEST_SOURCES),
+                Implementation(
+                    EnumEntryOrderDetector::class.java,
+                    EnumSet.of(
+                        Scope.JAVA_FILE,
+                        Scope.TEST_SOURCES,
                     ),
+                    EnumSet.of(Scope.JAVA_FILE),
+                    EnumSet.of(Scope.TEST_SOURCES),
+                ),
                 category = Category.PRODUCTIVITY,
                 priority = 5,
                 severity = Severity.ERROR,
