@@ -200,8 +200,9 @@ use `lintChecks`.
 
 | Abecedary version | Lint version  |
 |-------------------|---------------|
-| 0.2.0             | 31.2.0-beta01 |
+| 0.4.0             | 31.7.0        |
 | 0.3.0             | 31.5.0        |
+| 0.2.0             | 31.2.0-beta01 |
 
 Remember that lint versions are tied to Android Gradle Plugin (AGP) versions:
 
