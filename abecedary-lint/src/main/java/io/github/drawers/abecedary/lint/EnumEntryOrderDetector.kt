@@ -18,11 +18,10 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UEnumConstant
 import org.jetbrains.uast.getParentOfType
-import org.jetbrains.uast.kotlin.KotlinUEnumConstant
 import java.util.EnumSet
 
-@Suppress("UnstableApiUsage")
 class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
     override fun applicableAnnotations(): List<String> = listOf("Alphabetical")
 
@@ -57,14 +56,13 @@ class EnumEntryOrderDetector : Detector(), SourceCodeScanner {
         classToEnumConstants.clear()
     }
 
-    @Suppress("UnstableApiUsage")
     override fun visitAnnotationUsage(
         context: JavaContext,
         element: UElement,
         annotationInfo: AnnotationInfo,
         usageInfo: AnnotationUsageInfo,
     ) {
-        val enumConstant = element as? KotlinUEnumConstant ?: return
+        val enumConstant = element as? UEnumConstant ?: return
         val enumParent = enumConstant.getParentOfType<UClass>(strict = true) ?: return
         val annotatedClass =
             annotationInfo.annotation.getParentOfType<UClass>() ?: return
