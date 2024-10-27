@@ -19,9 +19,9 @@ enum class Fruit(override val id: Int) : Identifiable {
 }
 
 sealed class Vegetable : Edible {
-    object Carrot : Vegetable()
+    data object Carrot : Vegetable()
 
-    object Daikon : Vegetable()
+    data object Daikon : Vegetable()
 }
 
 val letters = @Alphabetical listOf("a", "b", "c")
@@ -36,9 +36,11 @@ fun printLetters() {
 }
 
 object Meal {
+    @Suppress("UNUSED_PARAMETER")
     fun tastyListOf(vararg s: String) = listOf<String>()
 }
 
 class Portion {
+    @Suppress("UNUSED_PARAMETER")
     fun tastyListOf(vararg s: String) = listOf<String>()
 }
