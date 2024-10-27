@@ -17,8 +17,8 @@ import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiClass
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UTypeReferenceExpression
 import org.jetbrains.uast.getParentOfType
-import org.jetbrains.uast.kotlin.KotlinUTypeReferenceExpression
 import java.util.EnumSet
 
 class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
@@ -53,7 +53,7 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
         classToSealedSubTypes.clear()
     }
 
-    @Suppress("UnstableApiUsage", "ktlint:standard:no-consecutive-comments")
+    @Suppress("ktlint:standard:no-consecutive-comments")
     override fun visitAnnotationUsage(
         context: JavaContext,
         element: UElement,
@@ -74,7 +74,7 @@ class SealedSubtypeOrderDetector : Detector(), SourceCodeScanner {
          */
 
         // `Fruit` in the example
-        val typeReference = element as? KotlinUTypeReferenceExpression ?: return
+        val typeReference = element as? UTypeReferenceExpression ?: return
 
         // `Banana` in the example
         val sealedSubType = typeReference.getParentOfType<UClass>() ?: return
