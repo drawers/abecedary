@@ -6,7 +6,7 @@ lint = "31.7.2"
 # lint checks must target JDK 17, but the runtime should remain 11
 lintJvmTarget = "17"
 runtimeJvmTarget = "11"
-agp = "8.7.2"
+agp = "8.7.3"
 kotlin = "1.9.25"
 
 [plugins]
