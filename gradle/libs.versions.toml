@@ -11,7 +11,7 @@ kotlin = "1.9.25"
 
 [plugins]
 lint = { id = "com.android.lint", version = "8.7.2" }
-dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.30.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
